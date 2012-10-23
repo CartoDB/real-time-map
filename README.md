@@ -8,7 +8,7 @@ This code periodically checks a [CartoDB](http://www.cartodb.com) table and refr
 1. [Sign up for a CartoDB](http://www.cartodb.com/signup) account.
 2. Upload some data (you can use the CSV files stored in the ```data``` folder).
 3. Download this repo.
-4. Edit the ```CONFIG``` hash in ```js/app.js``` with your CartoDB username.
+4. Edit the ```CONFIG``` hash in [js/app.js](https://github.com/CartoDB/real-time-map/blob/master/js/app.js#L1) with your CartoDB username.
 5. Open the page in a browser.
 6. Update some data from the table ```CONFIG.watchedTableName``` and watch how the map refreshes itself.
 
