@@ -23,5 +23,5 @@ http://cartodb.github.com/real-time-map
 
 --
 
-<span id="note-1">1</span>: However you can bind the refresh code to anything you want!
+<span id="note-1">1</span>: However you can bind the refresh code to anything you want!    
 <span id="note-2">2</span>: But bear in mind that that is just fake data for testing purposes.
