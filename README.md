@@ -6,7 +6,7 @@ This code periodically checks a [CartoDB](http://www.cartodb.com) table and refr
 ### Usage
 
 1. [Sign up for a CartoDB](http://www.cartodb.com/signup) account.
-2. Upload some data (you can use the CSV files stored in the ```data``` folder<sup><a href="#note-2">2</a></sup>).
+2. Upload some data (you can use the CSV files stored in the ```data``` folder <sup><a href="#note-2">2</a></sup>).
 3. Download this repo.
 4. Edit the ```CONFIG``` hash in [js/app.js](https://github.com/CartoDB/real-time-map/blob/master/js/app.js#L1) with your CartoDB username.
 5. Open the page in a browser.
