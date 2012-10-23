@@ -1,7 +1,9 @@
-Real-Time Map
-=================
+CartoDB Real-Time Map Template
+==============================
 
 This code periodically checks a [CartoDB](http://www.cartodb.com) table and refreshes a map in real-time when it detects that the data was updated <sup><a href="#note-1">1</a></sup>.
+
+![Map](http://cartodb.s3.amazonaws.com/tumblr/posts/election_animated_map.gif)
 
 ### Usage
 
