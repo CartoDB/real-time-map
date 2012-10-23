@@ -6,23 +6,21 @@ CONFIG = {
   maxZoom: 9,
   minZoom: 4,
   userName: 'viz2',
-  //userName: 'wsjgraphics02',
   tableName: 'cty0921md',
   refreshInterval: 3000,
 
-  style: "#st0921md { line-width:1; line-opacity:1; } \
-    [status='none'] { line-color: #ffffff; polygon-fill: #eeeeee;  } \
-    [status='RR']   { line-color: #ffffff; polygon-fill: #c72535;  } \
-    [status='R']    { line-color: #ffffff; polygon-fill: #c72535;  } \
-    [status='D']    { line-color: #ffffff; polygon-fill: #5c94ba;  } \
-    [status='DD']   { line-color: #ffffff; polygon-fill: #0073a2;  } \
-    [status='I']    { line-color: #999999; polygon-fill: #FFEEC3;  } \
-    [status='II']   { line-color: #999999; polygon-fill: #FFEEC3;  } \
-    [status='U']    { line-color: #666666; polygon-fill: #ffffff;  }",
+  style: "#st0921md { line-width:1; line-color: #ffffff; line-opacity:1; } \
+    [status='none'] { polygon-fill: #eeeeee;  } \
+    [status='RR']   { polygon-fill: #c72535;  } \
+    [status='R']    { polygon-fill: #c72535;  } \
+    [status='D']    { polygon-fill: #5c94ba;  } \
+    [status='DD']   { polygon-fill: #0073a2;  } \
+    [status='I']    { polygon-fill: #FFEEC3;  } \
+    [status='II']   { polygon-fill: #FFEEC3;  } \
+    [status='U']    { polygon-fill: #ffffff;  } ",
 
   polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
-  polygonClickStyle: { color: "red", weight: 5, opacity: 0.65, clickable:false }
-
+  polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
 
 };
 
@@ -205,8 +203,8 @@ function createLayer(updatedAt, opacity) {
 
 }
 
-// Fade out the layer
-function fadeOut(lyr) {
+// Fade in and switch the layers
+function fadeIn(lyr) {
 
   var
   deleted = false,
@@ -241,26 +239,29 @@ function fadeOut(lyr) {
   })();
 }
 
+// When the new layer is fully loaded, we show it gradually.
+// Then we remove the old layer.
 function onLayerLoaded(layerNew) {
 
   layerNew.off("load", null, layerNew); // unbind the load event
   showMessage("Map updated");
 
-  if (oldIE) {
+  if (oldIE) { // since IE<9 doesn't support opacity, we just remove the layer
 
     map.removeLayer(layer);
 
     delete layer;
-    layer = layerNew;
+    layer = layerNew; // layer switch
 
   } else {
-    fadeOut(layerNew);
+    fadeIn(layerNew);
   }
 
 }
 
 function refresh() {
 
+  // We ping this URL every 3000ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
   var tableName = 'states_results';
   var url = "http://" + CONFIG.userName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + tableName + " ORDER BY updated_at DESC LIMIT 1");
 
@@ -287,9 +288,7 @@ function refresh() {
 
         showMessage("New data coming…");
 
-        // old IE versions doesn't support opacity, in that case we create
-        // a visible layer
-        var opacity = (oldIE) ? 1 : 0;
+        var opacity = (oldIE) ? 1 : 0; // since IE<9 versions don't support opacity we just create a visible layer
 
         var layerNew = createLayer(updatedAt, opacity);
 
@@ -311,6 +310,7 @@ function refresh() {
   }
 }
 
+// To maximize the feature hover/out speed we load the geometries of the counties in a hash
 function getHoverData() {
 
   var url = "http://com.cartodb.uselections.s3.amazonaws.com/hover_geoms/cty0921md_01.js";
@@ -328,8 +328,10 @@ function initialize() {
   // Initialize the popup
   popup = new L.CartoDBPopup();
 
+  // Get the counties' geometries
   getHoverData();
 
+  // Set the map options
   var mapOptions = {
     center: new L.LatLng(CONFIG.lat, CONFIG.lng),
     zoom: CONFIG.zoom,
@@ -345,6 +347,6 @@ function initialize() {
     map.removeLayer(clickLayer);
   });
 
-  refresh(); // Start!
+  refresh(); // Go!
 }
 
