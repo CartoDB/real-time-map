@@ -321,7 +321,7 @@ function getHoverData() {
 
 }
 
-function initialize() {
+function init() {
 
   setupStopWatch();
 
