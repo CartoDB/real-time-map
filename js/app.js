@@ -192,7 +192,10 @@ function createLayer(updatedAt, opacity) {
 
   return new L.CartoDBLayer({
     map: map,
-    user_name:  CONFIG.userName,
+
+    tiler_domain: "d2c5ry9dy1ewvi.cloudfront.net",
+
+    user_name:  "",
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
@@ -204,8 +207,8 @@ function createLayer(updatedAt, opacity) {
 
     interactivity: "cartodb_id, status, st_usps",
 
-    featureOver: onFeatureHover,
-    featureOut: onFeatureOut,
+    featureOver:  onFeatureHover,
+    featureOut:   onFeatureOut,
     featureClick: onFeatureClick
   });
 
