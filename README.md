@@ -1,7 +1,7 @@
 Real-Time Map
 =================
 
-This code periodically checks a CartoDB table and refreshes a map in real-time when it detects that the data was updated <sup><a href="#note">1</a></sup>.
+This code periodically checks a [CartoDB](http://www.cartodb.com) table and refreshes a map in real-time when it detects that the data was updated <sup><a href="#note">1</a></sup>.
 
 ### Powered by
 
