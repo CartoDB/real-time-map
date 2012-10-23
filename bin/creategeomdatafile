@@ -1,0 +1,1 @@
+node creategeomdatafile.js > data.min.js
