@@ -8,7 +8,7 @@ CONFIG = {
 
   // CartoDB user and main table name
   userName: 'viz2',
-  tableName: 'cty0921md',
+  tableName: 'counties',
 
   // We can observe another table and update the map when it's updated
   watchedUserName: 'viz2',
@@ -17,7 +17,7 @@ CONFIG = {
   // number of ms between refreshes
   refreshInterval: 3000,
 
-  style: "#cty0921md { line-width:1; line-color: #ffffff; } \
+  style: "#counties { line-width:1; line-color: #ffffff; } \
     [status='none']  { polygon-fill: #eeeeee; } \
     [status='RR']    { polygon-fill: #c72535; } \
     [status='R']     { polygon-fill: #c72535; } \
@@ -188,7 +188,7 @@ function onFeatureHover(e, latlng, pos, data) {
 
 function createLayer(updatedAt, opacity) {
 
-  var query = "SELECT st_name, st_usps, cty0921md.the_geom_webmercator, cty0921md.cartodb_id, states_results.gov_result as status, cty0921md.fips as thecode, cty0921md.st_usps as usps FROM cty0921md, states_results WHERE states_results.usps = cty0921md.st_usps";
+  var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps";
 
   return new L.CartoDBLayer({
     map: map,
@@ -363,4 +363,3 @@ function init() {
 
   refresh(); // Go!
 }
-
