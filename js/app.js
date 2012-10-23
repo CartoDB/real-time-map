@@ -195,7 +195,7 @@ function createLayer(updatedAt, opacity) {
 
     tiler_domain: "d2c5ry9dy1ewvi.cloudfront.net",
 
-    user_name:  "",
+    user_name:  "", // <- if you don't use a CDN put your username here
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
