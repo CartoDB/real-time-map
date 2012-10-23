@@ -5,9 +5,9 @@ This code periodically checks a [CartoDB](http://www.cartodb.com) table and refr
 
 ### Usage
 
-1. Signup for a CartoDB account.
-2. Upload the data (you can use the csv files stored in the ```data``` folder).
-3. Get this repo.
+1. Signup for a [CartoDB](http://www.cartodb.com/signup) account.
+2. Upload the data (you can use the CSV files stored in the ```data``` folder).
+3. Download this repo.
 4. Edit the ```CONFIG``` hash in ```js/app.js``` with your CartoDB username.
 5. Open the page in a browser.
 6. Update some data and watch how the map refreshes itself.
