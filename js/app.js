@@ -269,7 +269,7 @@ function onLayerLoaded(layerNew) {
 
 function refresh() {
 
-  // We ping this URL every 3000ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
+  // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
   var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {

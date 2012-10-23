@@ -114,11 +114,11 @@ a:hover {
 
 .last-update {
   position: absolute;
-  top: 40px;
-  right: 50px;
+  top: 15px;
+  right: 160px;
   font-size: 14px;
   font-family: "Droid Sans", sans-serif;
-  z-index: 1000; }
+  z-index: 100; }
 
 .leaflet-container .leaflet-control-attribution {
   display: none; }
