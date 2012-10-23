@@ -5,8 +5,16 @@ CONFIG = {
   zoom:    3,
   maxZoom: 9,
   minZoom: 4,
+
+  // CartoDB user and main table name
   userName: 'viz2',
   tableName: 'cty0921md',
+
+  // We can observe another table and update the map when it's updated
+  watchedUserName: 'viz2',
+  watchedTableName: 'states_results',
+
+  // number of ms between refreshes
   refreshInterval: 3000,
 
   style: "#cty0921md { line-width:1; line-color: #ffffff; } \
@@ -262,8 +270,7 @@ function onLayerLoaded(layerNew) {
 function refresh() {
 
   // We ping this URL every 3000ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-  var tableName = 'states_results';
-  var url = "http://" + CONFIG.userName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + tableName + " ORDER BY updated_at DESC LIMIT 1");
+  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
