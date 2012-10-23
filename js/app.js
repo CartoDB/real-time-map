@@ -9,15 +9,15 @@ CONFIG = {
   tableName: 'cty0921md',
   refreshInterval: 3000,
 
-  style: "#st0921md { line-width:1; line-color: #ffffff; line-opacity:1; } \
-    [status='none'] { polygon-fill: #eeeeee;  } \
-    [status='RR']   { polygon-fill: #c72535;  } \
-    [status='R']    { polygon-fill: #c72535;  } \
-    [status='D']    { polygon-fill: #5c94ba;  } \
-    [status='DD']   { polygon-fill: #0073a2;  } \
-    [status='I']    { polygon-fill: #FFEEC3;  } \
-    [status='II']   { polygon-fill: #FFEEC3;  } \
-    [status='U']    { polygon-fill: #ffffff;  } ",
+  style: "#cty0921md { line-width:1; line-color: #ffffff; } \
+    [status='none']  { polygon-fill: #eeeeee; } \
+    [status='RR']    { polygon-fill: #c72535; } \
+    [status='R']     { polygon-fill: #c72535; } \
+    [status='D']     { polygon-fill: #5c94ba; } \
+    [status='DD']    { polygon-fill: #0073a2; } \
+    [status='I']     { polygon-fill: #FFEEC3; } \
+    [status='II']    { polygon-fill: #FFEEC3; } \
+    [status='U']     { polygon-fill: #ffffff; } ",
 
   polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
   polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
@@ -267,8 +267,15 @@ function refresh() {
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
-    if (!data.rows) {
-      data = JSON.parse(data);
+    try {
+
+      if (!data.rows) {
+        data = JSON.parse(data);
+      }
+
+    } catch(e) {
+      // console.log(e);
+      return;
     }
 
     var updatedAt     = data.rows[0].updated_at;
