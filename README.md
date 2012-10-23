@@ -6,29 +6,11 @@ This code periodically checks a [CartoDB](http://www.cartodb.com) table and refr
 ### Usage
 
 1. Signup for a CartoDB account.
-2. Upload the data (you can use the csv files stored in ´´´data´´´).
+2. Upload the data (you can use the csv files stored in the ```data``` folder).
 3. Get this repo.
-4. Update the CONFIG var to your needs: 
-
-```
-
-...
-
-  // CartoDB user and main table name
-  userName: 'viz2',
-  tableName: 'counties',
-
-  // We can observe another table and update the map when it's updated
-  watchedUserName: 'viz2',
-  watchedTableName: 'states_results',
-
-  // number of ms between refreshes
-  refreshInterval: 3000,
-
-...
-
-
-```
+4. Edit the ```CONFIG``` hash in ```js/app.js``` with your CartoDB username.
+5. Open the page in a browser.
+6. Update some data and watch how the map refreshes itself.
 
 ### Powered by
 
