@@ -21,6 +21,14 @@ This code periodically checks a [CartoDB](http://www.cartodb.com) table and refr
 
 http://cartodb.github.com/real-time-map
 
+### Changelog
+
+0.1: 10/23/2012 - Release
+
+### Browser support
+
+Chrome, Safari 5, Firefox 15, Opera 12, IE 7+.
+
 --
 
 <span id="note-1">1</span>: However you can bind the refresh code to anything you want!    
