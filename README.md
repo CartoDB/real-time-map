@@ -1,4 +1,4 @@
-Real-time Map
+Real-Time Map
 =================
 
 1. Signup in Cartodb: [http://cartodb.github.com/signup](http://cartodb.github.com/signup)
