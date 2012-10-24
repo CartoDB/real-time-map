@@ -10,6 +10,9 @@ CONFIG = {
   userName: 'viz2',
   tableName: 'counties',
 
+  // number of ms between refreshes
+  refreshInterval: 3000,
+
   // We can observe another table and update the map when it's updated
   watchedUserName: 'viz2',
   watchedTableName: 'states_results',
@@ -28,9 +31,6 @@ CONFIG = {
   polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
 
 };
-
-window.stop_refresh     = false;
-window.refresh_interval = 3000;
 
 var
 hoverData       = null,
@@ -193,9 +193,7 @@ function createLayer(epoch, opacity) {
   return new L.CartoDBLayer({
     map: map,
 
-    tiler_domain: "d2c5ry9dy1ewvi.cloudfront.net",
-
-    user_name:  "", // <- if you don't use a CDN put your username here
+    user_name:  CONFIG.userName,
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
@@ -272,8 +270,6 @@ function onLayerLoaded(layerNew) {
 
 function refresh() {
 
-  if (window.stop_refresh) return;
-
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
   var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
 
@@ -324,7 +320,7 @@ function refresh() {
   }});
 
   if (!timer) { // creates the timer
-    timer = setInterval(refresh, window.refresh_interval);
+    timer = setInterval(refresh, CONFIG.refreshInterval);
   }
 }
 
