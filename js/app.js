@@ -290,7 +290,7 @@ function refresh() {
       return;
     }
 
-    var epoch     = data.rows[0].epoch_updated;
+    var epoch = data.rows[0].epoch_updated;
 
     if (epoch > lastEpoch) { // Update the map
 
