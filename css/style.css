@@ -120,7 +120,7 @@ a:hover {
     color:#333;
 
   }
-    .btn:hover { text-decoration: underline; }
+    .btn:hover { color: black; }
 
 .controls {
   position:absolute;
@@ -168,8 +168,8 @@ a:hover {
 
 .last-update {
   position: absolute;
-  bottom: 35px;
-  right: 360px;
+  bottom: 45px;
+  right: 320px;
   font-size: 14px;
   font-family: "Droid Sans", sans-serif;
   z-index: 10000; }
