@@ -1,0 +1,12 @@
+{
+  "name": "creategeomdatafile",
+  "version": "0.0.1",
+  "engines": {
+    "node": "latest",
+    "npm":  "1.1.9"
+  },
+  "dependencies": {
+    "jquery":"latest"
+  }
+}
+
