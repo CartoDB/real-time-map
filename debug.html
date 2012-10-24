@@ -20,6 +20,11 @@
 
   <body onload="init();">
 
+    <div class="controls">
+      <a href="#" class="btn toggle_refresh">Stop autorefresh</a>
+      <a href="#" class="btn">Force refresh</a>
+    </div>
+
     <a href="#" class="refresh">Refresh</a>
     <div class="message">Map updated</div>
 
@@ -382,6 +387,23 @@ function getHoverData() {
 
 function init() {
 
+        $(".toggle_refresh").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        window.stop_refresh = !window.stop_refresh;
+
+        if (window.stop_refresh) {
+        $(this).html("Start autorefresh");
+
+        } else {
+
+        $(this).html("");
+        $(this).html("Stop autorefresh");
+        }
+
+        });
+
         $(".refresh").on("click", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -416,8 +438,6 @@ function init() {
 
   refresh(); // Go!
 }
-    
-    
     </script>
 
     <a href="https://github.com/cartodb/real-time-map"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
