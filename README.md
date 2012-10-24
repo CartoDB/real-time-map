@@ -20,7 +20,7 @@ There are two preprocessed common tables that could be used in USA: states and c
 2. ```npm install```
 3. ```./creategeomdatafile```
 
-You'll find the geometries in a file named ```data.min.jsonp```.
+The geometries will be then stored in a file named ```data.min.json```.
 
 ![Map](http://cartodb.s3.amazonaws.com/tumblr/posts/election_animated_map.gif)
 
