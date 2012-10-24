@@ -20,6 +20,7 @@
 
   <body onload="init();">
 
+    <a href="#" class="refresh">Refresh</a>
     <div class="message">Map updated</div>
 
     <div class="last-update"></div>
@@ -310,9 +311,9 @@ function onLayerLoaded(layerNew) {
 
 }
 
-function refresh() {
+function refresh(force) {
 
-  if (window.stop_refresh) return;
+  if (window.stop_refresh && force != true) return;
 
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
   var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
@@ -380,6 +381,14 @@ function getHoverData() {
 }
 
 function init() {
+
+        $(".refresh").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        refresh(true);
+        console.log("refreshing");
+
+        });
 
   setupStopWatch();
 
