@@ -12,5 +12,5 @@ while(true)
 
   i = i + 1
 
-  sleep 5
+  sleep 120
 end
