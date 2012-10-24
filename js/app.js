@@ -275,7 +275,7 @@ function refresh() {
   if (window.stop_refresh) return;
 
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
+  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
@@ -290,10 +290,10 @@ function refresh() {
       return;
     }
 
-    var updatedAt     = data.rows[0].updated_at;
-    var updatedAtDate = moment(updatedAt);
+    var updatedAt     = data.rows[0].epoch_updated;
+    //var updatedAtDate = moment(updatedAt);
 
-    if (updatedAtDate > lastUpdate) { // Update the map
+    if (updatedAt > lastUpdate) { // Update the map
 
       if (!layer) { // create layer
 
@@ -319,7 +319,7 @@ function refresh() {
 
       }
 
-      lastUpdate = updatedAtDate;
+      lastUpdate = updatedAt;
     }
 
   }});
