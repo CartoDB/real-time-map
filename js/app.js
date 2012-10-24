@@ -14,9 +14,6 @@ CONFIG = {
   watchedUserName: 'viz2',
   watchedTableName: 'states_results',
 
-  // number of ms between refreshes
-  refreshInterval: 3000,
-
   style: "#counties { line-width:1; line-color: #ffffff; } \
     [status='none']  { polygon-fill: #eeeeee; } \
     [status='RR']    { polygon-fill: #c72535; } \
@@ -32,12 +29,15 @@ CONFIG = {
 
 };
 
+window.stop_refresh     = false;
+window.refresh_interval = 3000;
+
 var
 hoverData       = null,
 timeID          = null,
 request         = null,
 timer           = null,
-lastUpdate      = null;
+lastEpoch      = null;
 
 var
 popup           = null,
@@ -186,26 +186,29 @@ function onFeatureHover(e, latlng, pos, data) {
   highlightPolygon(data);
 }
 
-function createLayer(updatedAt, opacity) {
+function createLayer(epoch, opacity) {
 
   var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps";
 
   return new L.CartoDBLayer({
     map: map,
-    user_name:  CONFIG.userName,
+
+    tiler_domain: "d2c5ry9dy1ewvi.cloudfront.net",
+
+    user_name:  "", // <- if you don't use a CDN put your username here
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
     query:      query,
 
     extra_params: {
-      cache_buster: updatedAt
+      cache_buster: epoch
     },
 
     interactivity: "cartodb_id, status, st_usps",
 
-    featureOver: onFeatureHover,
-    featureOut: onFeatureOut,
+    featureOver:  onFeatureHover,
+    featureOut:   onFeatureOut,
     featureClick: onFeatureClick
   });
 
@@ -269,8 +272,10 @@ function onLayerLoaded(layerNew) {
 
 function refresh() {
 
+  if (window.stop_refresh) return;
+
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT updated_at FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
+  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
@@ -285,14 +290,13 @@ function refresh() {
       return;
     }
 
-    var updatedAt     = data.rows[0].updated_at;
-    var updatedAtDate = moment(updatedAt);
+    var epoch = data.rows[0].epoch_updated;
 
-    if (updatedAtDate > lastUpdate) { // Update the map
+    if (epoch > lastEpoch) { // Update the map
 
       if (!layer) { // create layer
 
-        layer = createLayer(updatedAt, 1);
+        layer = createLayer(epoch, 1);
 
         map.addLayer(layer, false);
 
@@ -304,7 +308,7 @@ function refresh() {
 
         var opacity = (oldIE) ? 1 : 0; // since IE<9 versions don't support opacity we just create a visible layer
 
-        var layerNew = createLayer(updatedAt, opacity);
+        var layerNew = createLayer(epoch, opacity);
 
         map.addLayer(layerNew, false);
 
@@ -314,13 +318,13 @@ function refresh() {
 
       }
 
-      lastUpdate = updatedAtDate;
+      lastEpoch = epoch;
     }
 
   }});
 
   if (!timer) { // creates the timer
-    timer = setInterval(refresh, CONFIG.refreshInterval);
+    timer = setInterval(refresh, window.refresh_interval);
   }
 }
 
