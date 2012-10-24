@@ -13,6 +13,15 @@ The main functionality of the template is the following:
 
 There are two preprocessed common tables that could be used in USA: states and counties. They are also added on this repo. Thanks to the WSJ for creating this nice geometries. You can also find the shapefiles for those datasets in the repo so that you can import them on your **CartoDB**.
 
+
+### How to generate the geometries
+
+1. ```cd``` into the ```bin``` directory.
+2. ```npm install```
+3. ```./creategeomdatafile```
+
+You'll find the geometries in a file named ```data.min.jsonp```.
+
 ![Map](http://cartodb.s3.amazonaws.com/tumblr/posts/election_animated_map.gif)
 
 ### Powered by
