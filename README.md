@@ -11,7 +11,10 @@ The main functionality of the template is the following:
 
 - We have a technique here to do hover effects over the polygons that work nicely in old browsers (I'm looking at you, IE). Basically we have a pregenerated JSON with the geometries of the polygons to represent highly simplified and in a data structure that will be fast to access. When hovering, we know the ```cartodb_id``` of the polygon because of the interactivity, we look at this cache of geometries and get the coordinates, make a polygon with it and add it. To create the JSON cache of the geometries we used a node.js script that is also available here (see below). TODO: we could further optimize here so that mobile devices do not load this.
 
-There are two preprocessed common tables that could be used in USA: states and counties. They are also added on this repo. Thanks to the WSJ for creating this nice geometries. You can also find the shapefiles for those datasets in the repo so that you can import them on your **CartoDB**.
+There are two preprocessed common tables that could be used in USA: states and counties. You'll find the shapefiles of the two tables in the ```data``` folder. Thanks to the WSJ for creating this nice geometries. You can also find the shapefiles for those datasets in the repo so that you can import them on your **CartoDB**.
+
+![Map](http://cartodb.s3.amazonaws.com/tumblr/posts/election_animated_map.gif)
+
 
 ### How to generate the geometries
 
@@ -20,8 +23,6 @@ There are two preprocessed common tables that could be used in USA: states and c
 3. ```./creategeomdatafile```
 
 The geometries will be then stored in a file named ```data.min.json```.
-
-![Map](http://cartodb.s3.amazonaws.com/tumblr/posts/election_animated_map.gif)
 
 ### Powered by
 
