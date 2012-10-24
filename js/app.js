@@ -14,9 +14,6 @@ CONFIG = {
   watchedUserName: 'viz2',
   watchedTableName: 'states_results',
 
-  // number of ms between refreshes
-  refreshInterval: 3000,
-
   style: "#counties { line-width:1; line-color: #ffffff; } \
     [status='none']  { polygon-fill: #eeeeee; } \
     [status='RR']    { polygon-fill: #c72535; } \
@@ -32,7 +29,8 @@ CONFIG = {
 
 };
 
-window.stop_refresh = false;
+window.stop_refresh     = false;
+window.refresh_interval = 3000;
 
 var
 hoverData       = null,
@@ -327,7 +325,7 @@ function refresh() {
   }});
 
   if (!timer) { // creates the timer
-    timer = setInterval(refresh, CONFIG.refreshInterval);
+    timer = setInterval(refresh, window.refresh_interval);
   }
 }
 
