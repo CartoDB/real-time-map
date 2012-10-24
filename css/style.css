@@ -118,7 +118,7 @@ a:hover {
   right: 160px;
   font-size: 14px;
   font-family: "Droid Sans", sans-serif;
-  z-index: 100; }
+  z-index: 10000; }
 
 .leaflet-container .leaflet-control-attribution {
   display: none; }
