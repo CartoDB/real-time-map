@@ -37,7 +37,7 @@ hoverData       = null,
 timeID          = null,
 request         = null,
 timer           = null,
-lastUpdate      = null;
+lastEpoch      = null;
 
 var
 popup           = null,
@@ -186,7 +186,7 @@ function onFeatureHover(e, latlng, pos, data) {
   highlightPolygon(data);
 }
 
-function createLayer(updatedAt, opacity) {
+function createLayer(epoch, opacity) {
 
   var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps";
 
@@ -202,7 +202,7 @@ function createLayer(updatedAt, opacity) {
     query:      query,
 
     extra_params: {
-      cache_buster: updatedAt
+      cache_buster: epoch
     },
 
     interactivity: "cartodb_id, status, st_usps",
@@ -290,14 +290,13 @@ function refresh() {
       return;
     }
 
-    var updatedAt     = data.rows[0].epoch_updated;
-    //var updatedAtDate = moment(updatedAt);
+    var epoch     = data.rows[0].epoch_updated;
 
-    if (updatedAt > lastUpdate) { // Update the map
+    if (epoch > lastEpoch) { // Update the map
 
       if (!layer) { // create layer
 
-        layer = createLayer(updatedAt, 1);
+        layer = createLayer(epoch, 1);
 
         map.addLayer(layer, false);
 
@@ -309,7 +308,7 @@ function refresh() {
 
         var opacity = (oldIE) ? 1 : 0; // since IE<9 versions don't support opacity we just create a visible layer
 
-        var layerNew = createLayer(updatedAt, opacity);
+        var layerNew = createLayer(epoch, opacity);
 
         map.addLayer(layerNew, false);
 
@@ -319,7 +318,7 @@ function refresh() {
 
       }
 
-      lastUpdate = updatedAt;
+      lastEpoch = epoch;
     }
 
   }});
