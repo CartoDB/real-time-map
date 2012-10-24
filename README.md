@@ -5,7 +5,7 @@ This repository is a template project to create a map with **CartoDB** that is d
 
 The main functionality of the template is the following:
 
-- Map updates itself when it detects updates on **CartoDB** tables. This is done by using a "heartbeat" request asking for the latest time a table has changed (looking at the latest updated_at value on the table).
+- Map updates itself when it detects updates on **CartoDB** tables. This is done by using a "heartbeat" request asking for the latest time a table has changed (looking at the latest ```updated_at``` value on the table).
 
 - When the map detects changes it starts loading the tiles for the map on the background and only when everything is loaded it replace the current ones. That makes possible the blending effect when data changes. We have events for when new data starts coming and for when is all loaded.
 
