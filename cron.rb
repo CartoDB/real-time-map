@@ -9,6 +9,7 @@ while(true)
 
   i = i + 1
 
-  i = 0 if i > 7
+  i = 0 if i == 7
+
   sleep 5
 end
