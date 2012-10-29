@@ -15,14 +15,14 @@ CONFIG = {
   watchedTableName: 'states_results',
 
   style: "#counties { line-width:1; line-color: #ffffff; } \
-    [status='none']  { polygon-fill: #eeeeee; } \
-    [status='RR']    { polygon-fill: #c72535; } \
-    [status='R']     { polygon-fill: #c72535; } \
-    [status='D']     { polygon-fill: #5c94ba; } \
-    [status='DD']    { polygon-fill: #0073a2; } \
-    [status='I']     { polygon-fill: #FFEEC3; } \
-    [status='II']    { polygon-fill: #FFEEC3; } \
-    [status='U']     { polygon-fill: #ffffff; } ",
+    [status='0']  { polygon-fill: #000000; } \
+    [status='1']    { polygon-fill: #0000FF; } \
+    [status='2']     { polygon-fill: #996633; } \
+    [status='3']     { polygon-fill: #00ffff; } \
+    [status='4']    { polygon-fill: #00ff00; } \
+    [status='5']     { polygon-fill: #ff00ff; } \
+    [status='6']    { polygon-fill: #ff7f00; } \
+    [status='7']     { polygon-fill: #7f007f; } ",
 
   polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
   polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
@@ -186,23 +186,24 @@ function onFeatureHover(e, latlng, pos, data) {
   highlightPolygon(data);
 }
 
-function createLayer(epoch, opacity) {
+function createLayer(version, opacity) {
 
-  var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps";
+  var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps AND version="+version;
 
   return new L.CartoDBLayer({
     map: map,
 
-    tiler_domain: "d2c5ry9dy1ewvi.cloudfront.net",
+    tiler_domain: "{s}.viz2.cartodb.com",
+    subdomains: "abcd",
 
-    user_name:  "", // <- if you don't use a CDN put your username here
+    //user_name:  "viz2", // <- if you don't use a CDN put your username here
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
     query:      query,
 
     extra_params: {
-      cache_buster: epoch
+      cache_buster: version
     },
 
     interactivity: "cartodb_id, status, st_usps",
@@ -275,7 +276,7 @@ function refresh() {
   if (window.stop_refresh) return;
 
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
+  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
