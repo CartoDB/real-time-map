@@ -839,7 +839,7 @@ if (typeof(L.CartoDBLayer) === "undefined") {
       var timeout = setTimeout(function() {
         clearTimeout(timeout);
 
-        if (self.interaction) self.interaction.remove();
+        //if (self.interaction) self.interaction.remove();
 
         if (self.options.debug) throw ('There is an error in your query or your interaction parameter');
 
