@@ -41,6 +41,7 @@
 
     <script type="text/javascript">
     
+    
 CONFIG = {
 
   lat:     30.849,
@@ -73,7 +74,7 @@ CONFIG = {
 };
 
 window.stop_refresh     = false;
-window.refresh_interval = 30000;
+window.refresh_interval = 3000;
 
 window.refresh = refresh;
 
@@ -231,9 +232,9 @@ function onFeatureHover(e, latlng, pos, data) {
   highlightPolygon(data);
 }
 
-function createLayer(epoch, opacity) {
+function createLayer(version, opacity) {
 
-  var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps";
+  var query = "SELECT st_name, st_usps, counties.the_geom_webmercator, counties.cartodb_id, states_results.gov_result as status, counties.fips as thecode, counties.st_usps as usps FROM counties, states_results WHERE states_results.usps = counties.st_usps AND version="+version;
 
   return new L.CartoDBLayer({
     map: map,
@@ -241,14 +242,14 @@ function createLayer(epoch, opacity) {
     tiler_domain: "{s}.viz2.cartodb.com",
     subdomains: "abcd",
 
-    user_name:  "", // <- if you don't use a CDN put your username here
+    //user_name:  "viz2", // <- if you don't use a CDN put your username here
     table_name: CONFIG.tableName,
     tile_style: CONFIG.style,
     opacity:    opacity,
     query:      query,
 
     extra_params: {
-      cache_buster: epoch
+      cache_buster: version
     },
 
     interactivity: "cartodb_id, status, st_usps",
@@ -321,7 +322,8 @@ function refresh(force) {
   if (window.stop_refresh && force != true) return;
 
   // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT EXTRACT(EPOCH FROM updated_at) AS epoch_updated FROM " + CONFIG.watchedTableName + " ORDER BY updated_at DESC LIMIT 1");
+  var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
+
 
   $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
