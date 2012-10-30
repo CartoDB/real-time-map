@@ -10,15 +10,11 @@ while(true)
   if i == 7
     i = -1
     system("curl -d \"q=DELETE FROM states_results WHERE version < (SELECT max(version) FROM states_results) -7&api_key=cb07c48abf5eda40ab2b66818f8b1733f4d1ce0a\" http://viz2.cartodb.com/api/v2/sql")
-    system("curl -d \"q=vacuum full analyze states_results&api_key=xxxxx" http://viz2.cartodb.com/api/v2/sql")    
+    system("curl -d \"q=vacuum full analyze states_results&api_key=cb07c48abf5eda40ab2b66818f8b1733f4d1ce0a\" http://viz2.cartodb.com/api/v2/sql")    
   end
 
   i = i + 1
 
-<<<<<<< HEAD
   sleep 15
 
-=======
-  sleep 7
->>>>>>> gh-pages
 end
