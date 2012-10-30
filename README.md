@@ -36,6 +36,7 @@ http://cartodb.github.com/real-time-map
 ### Changelog
 
 0.1: 10/23/2012 - Release
+0.1.1: 10/30/2012 - Several bug fixes
 
 ### Browser support
 
