@@ -249,7 +249,8 @@ function createLayer(version, opacity) {
     query:      query,
 
     extra_params: {
-      cache_buster: version
+      cache_buster: version,
+      cache_policy: 'persist'
     },
 
     interactivity: "cartodb_id, status, st_usps",
