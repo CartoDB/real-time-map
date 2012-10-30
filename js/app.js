@@ -15,6 +15,7 @@ CONFIG = {
   watchedTableName: 'states_results',
 
   style: "#counties { line-width:1; line-color: #ffffff; } \
+<<<<<<< HEAD
     [status='0']    { polygon-fill: #000000; } \
     [status='1']    { polygon-fill: #0000FF; } \
     [status='2']    { polygon-fill: #996633; } \
@@ -23,6 +24,16 @@ CONFIG = {
     [status='5']    { polygon-fill: #ff00ff; } \
     [status='6']    { polygon-fill: #ff7f00; } \
     [status='7']    { polygon-fill: #7f007f; } ",
+=======
+    [status='0']  { polygon-fill: #000000; } \
+    [status='1']    { polygon-fill: #0000FF; } \
+    [status='2']     { polygon-fill: #996633; } \
+    [status='3']     { polygon-fill: #00ffff; } \
+    [status='4']    { polygon-fill: #00ff00; } \
+    [status='5']     { polygon-fill: #ff00ff; } \
+    [status='6']    { polygon-fill: #ff7f00; } \
+    [status='7']     { polygon-fill: #7f007f; } ",
+>>>>>>> gh-pages
 
   polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
   polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }

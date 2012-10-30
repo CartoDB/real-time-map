@@ -15,6 +15,10 @@ while(true)
 
   i = i + 1
 
+<<<<<<< HEAD
   sleep 15
 
+=======
+  sleep 7
+>>>>>>> gh-pages
 end
