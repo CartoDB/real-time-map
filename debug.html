@@ -60,21 +60,26 @@
 
         style: "#counties { line-width:1; line-color: #ffffff; } \
           [status='0']  { polygon-fill: #000000; } \
-          [status='1']    { polygon-fill: #0000FF; } \
-          [status='2']     { polygon-fill: #996633; } \
-          [status='3']     { polygon-fill: #00ffff; } \
-          [status='4']    { polygon-fill: #00ff00; } \
-          [status='5']     { polygon-fill: #ff00ff; } \
-          [status='6']    { polygon-fill: #ff7f00; } \
-          [status='7']     { polygon-fill: #7f007f; } ",
+          [status='1']  { polygon-fill: #0000FF; } \
+          [status='2']  { polygon-fill: #996633; } \
+          [status='3']  { polygon-fill: #00ffff; } \
+          [status='4']  { polygon-fill: #00ff00; } \
+          [status='5']  { polygon-fill: #ff00ff; } \
+          [status='6']  { polygon-fill: #ff7f00; } \
+          [status='7']  { polygon-fill: #7f007f; } ",
 
         polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
         polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
 
       };
 
-      window.stop_refresh     = false;
-      window.refresh_interval = 3000;
+      stop_refresh            = false;
+      lock_refresh            = false;
+      refresh_interval        = 3000;
+
+      window.stop_refresh     = stop_refresh;
+      window.lock_refresh     = lock_refresh;
+      window.refresh_interval = refresh_interval;
 
       window.refresh = refresh;
 
@@ -312,6 +317,8 @@
         layerNew.off("load", null, layerNew); // unbind the load event
         showMessage("Map updated");
 
+        lock_refresh = false;
+
         if (oldIE) { // since IE<9 doesn't support opacity, we just remove the layer
 
           map.removeLayer(layer);
@@ -328,7 +335,7 @@
 
       function refresh(force) {
 
-        if (window.stop_refresh && force != true) return;
+        if ( lock_refresh || (stop_refresh && force != true) ) return;
 
         // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
         var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
@@ -343,7 +350,7 @@
             }
 
           } catch(e) {
-            // console.log(e);
+            console.log("Error", e);
             return;
           }
 
@@ -363,6 +370,8 @@
 
               showMessage("New data coming…");
 
+              lock_refresh     = true;
+
               var opacity = (oldIE) ? 1 : 0; // since IE<9 versions don't support opacity we just create a visible layer
 
               var layerNew = createLayer(epoch, opacity);
@@ -381,7 +390,7 @@
         }});
 
         if (!timer) { // creates the timer
-          timer = setInterval(refresh, window.refresh_interval);
+          timer = setInterval(refresh, refresh_interval);
         }
       }
 
@@ -404,11 +413,10 @@
         if (document.hidden || document.webkitHidden || document.msHidden || document.mozHidden){  
           //new tab or window minimized
           timer = new Date().getTime();  
-          window.stop_refresh = true;
-        }  
-        else {  
+          lock_refresh = true;
+        }  else {  
           console.log('You were away for ' + (new Date().getTime()-timer)/1000+ ' seconds.')  
-          window.stop_refresh = false;
+          lock_refresh = false;
         }  
       }  
 
@@ -424,15 +432,18 @@
           e.preventDefault();
           e.stopPropagation();
 
-          window.stop_refresh = !window.stop_refresh;
+          stop_refresh = !stop_refresh;
+          lock_refresh = stop_refresh;
 
-          if (window.stop_refresh) {
+          if (stop_refresh) {
             $(this).html("Start autorefresh");
+            $(this).parent().addClass("stopped");
 
           } else {
 
             $(this).html("");
             $(this).html("Stop autorefresh");
+            $(this).parent().removeClass("stopped");
           }
 
         });
