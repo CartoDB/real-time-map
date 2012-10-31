@@ -289,7 +289,6 @@ function fadeIn(lyr) {
       // Switch layers
       map.removeLayer(layer);
 
-      delete layer;
       layer = lyr;
 
       map.invalidateSize(false);
@@ -309,7 +308,6 @@ function onLayerLoaded(layerNew) {
 
     map.removeLayer(layer);
 
-    delete layer;
     layer = layerNew; // layer switch
 
   } else {
