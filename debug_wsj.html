@@ -1,0 +1,496 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Real-Time Map (v. 0.1.0)</title>
+
+    <link href="css/style.css" media="screen, projection" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.css" />
+    <!--[if IE]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.ie.css" /><![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+
+    <style type="text/css">
+      .leaflet-container {
+        background: #fff;
+      }
+    </style>
+
+  </head>
+
+  <body onload="init();">
+
+
+    <div class="controls">
+      <a href="#" class="btn toggle_refresh">Stop autorefresh</a>
+      <a href="#" class="btn refresh">Force refresh</a>
+    </div>
+
+    <div class="message">Map updated</div>
+
+    <div class="last-update"></div>
+
+    <div id="map"></div>
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.js"></script>
+    <script type="text/javascript" src="js/vendor/wax.leaf.min.js"></script>
+    <script type="text/javascript" src="js/vendor/cartodb-leaflet-min.js"></script>
+    <script type="text/javascript" src="js/vendor/cartodb-popup-min.js"></script>
+    <script type="text/javascript" src="js/vendor/jintervals.js"></script>
+    <script type="text/javascript" src="js/vendor/jquery.stopwatch.js"></script>
+    <script type="text/javascript" src="js/vendor/moment.min.js"></script>
+
+    <script type="text/javascript">
+
+
+      CONFIG = {
+
+        lat:     30.849,
+        lng:    -28.371,
+        zoom:    3,
+        maxZoom: 9,
+        minZoom: 4,
+
+        // CartoDB user and main table name
+        userName: 'wsjgraphics',
+        tableName: 'cty0921md',
+
+        // We can observe another table and update the map when it's updated
+        watchedUserName: 'wsjgraphics',
+        watchedTableName: 'states_results',
+
+//        style: "#cty0921md { line-width:1; line-color: #ffffff; } \
+//          [status='0']  { polygon-fill: #000000; } \
+//          [status='1']  { polygon-fill: #0000FF; } \
+//          [status='2']  { polygon-fill: #996633; } \
+//          [status='3']  { polygon-fill: #00ffff; } \
+//          [status='4']  { polygon-fill: #00ff00; } \
+//          [status='5']  { polygon-fill: #ff00ff; } \
+//          [status='6']  { polygon-fill: #ff7f00; } \
+//          [status='7']  { polygon-fill: #7f007f; } ",
+//
+        polygonHoverStyle: { color: "#ff7800", weight: 5, opacity: 0.65, clickable:false },
+        polygonClickStyle: { color: "red",     weight: 5, opacity: 0.65, clickable:false }
+
+      };
+
+
+      autolock                = false;
+      stop_refresh            = false;
+      lock_refresh            = false;
+
+      refresh_interval        = 3000;
+
+      window.stop_refresh     = stop_refresh;
+      window.lock_refresh     = lock_refresh;
+      window.refresh_interval = refresh_interval;
+
+      window.refresh = refresh;
+
+      var
+      hoverData       = null,
+      timeID          = null,
+      request         = null,
+      timer           = null,
+      lastEpoch      = null;
+
+      var
+      popup           = null,
+      map             = null;
+
+      var // layers
+      layer           = null,
+      geojsonLayer    = new L.GeoJSON(null),
+      clickLayer      = new L.GeoJSON(null);
+
+      var oldIE = ($.browser.msie && $.browser.version < 9) ? true : false;
+
+      // Request animation frame
+      window.cancelRequestAnimFrame = ( function() {
+        return window.cancelAnimationFrame       ||
+        window.webkitCancelRequestAnimationFrame ||
+        window.mozCancelRequestAnimationFrame    ||
+        window.oCancelRequestAnimationFrame      ||
+        window.msCancelRequestAnimationFrame     ||
+
+        function( callback ){
+          window.clearTimeout(timeID);
+        };
+
+      })();
+
+      window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame   ||
+        window.mozRequestAnimationFrame      ||
+        window.oRequestAnimationFrame        ||
+        window.msRequestAnimationFrame       ||
+
+        function( callback ){
+          timeID = window.setTimeout(callback, 1000 / 60);
+        };
+
+      })();
+
+
+      // Stop watch methods
+      function setupStopWatch() {
+        $('.last-update').stopwatch({format: 'Last update: <strong>{Minutes} and {seconds} ago</strong>'});
+      }
+
+      function startStopWatch() {
+        $(".last-update").stopwatch('start');
+      }
+
+      function resetStopWatch() {
+        $(".last-update").stopwatch('reset');
+      }
+
+      function showMessage(message, hide) {
+
+        $(".message").html(message);
+
+        $(".message").animate({ opacity: 1, top: 0 }, { duration: 250, complete: function() {
+
+          if (hide) {
+            setTimeout(function() {
+              $(".message").animate({ opacity: 0, top: "-40px" }, 250);
+            }, 3000);
+          }
+
+        }});
+      }
+
+      // Adds a polygon in the area where the user clicked
+      function addClickPolygon(data) {
+
+        if (!hoverData) return;
+
+        map.removeLayer(clickLayer);
+
+        var polygon = {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [hoverData[data.cartodb_id]]
+          }
+        };
+
+        clickLayer = new L.GeoJSON(polygon, { style: CONFIG.polygonClickStyle });
+        map.addLayer(clickLayer);
+
+        clickLayer.cartodb_id = data.cartodb_id;
+      }
+
+      // Adds a hihglighted polygon
+      function highlightPolygon(data) {
+
+        if (!hoverData) return;
+
+        // Show the hover polygon if it is a different feature
+        map.removeLayer(geojsonLayer);
+
+        var polygon = {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [hoverData[data.cartodb_id]]
+          }
+        };
+
+        geojsonLayer = new L.GeoJSON(polygon, { style: CONFIG.polygonHoverStyle });
+        map.addLayer(geojsonLayer);
+
+        geojsonLayer.cartodb_id = data.cartodb_id;
+
+      }
+
+      function onFeatureClick(e, latlng, pos, data) {
+
+        if (typeof( window.event ) != "undefined" ) { // IE
+          e.cancelBubble=true;
+        } else { // Rest
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        // Set popup content
+        popup.setContent(data);
+
+        // Set position
+        popup.setLatLng(latlng);
+
+        // Show the popup
+        map.openPopup(popup);
+        addClickPolygon(data);
+      }
+
+      function onFeatureOut() {
+
+        if (!hoverData) return;
+
+        document.body.style.cursor = "default";
+
+        geojsonLayer.cartodb_id = null;
+        geojsonLayer.off("featureparse");
+        map.removeLayer(geojsonLayer)
+
+      }
+
+      function onFeatureHover(e, latlng, pos, data) {
+        document.body.style.cursor = "pointer";
+
+        highlightPolygon(data);
+      }
+
+      function createLayer(version, opacity) {
+
+        var query = "SELECT st_name, st_usps, cty0921md.the_geom_webmercator, cty0921md.cartodb_id, states_results.gov_result as status, cty0921md.fips as thecode, cty0921md.st_usps as usps FROM cty0921md, states_results WHERE states_results.usps = cty0921md.st_usps AND version="+version;
+
+        return new L.CartoDBLayer({
+          map: map,
+
+          tiler_domain: "{s}.wsjgraphics.cartodb.com",
+          subdomains: "abcd",
+
+          //user_name:  "viz2", // <- if you don't use a CDN put your username here
+          table_name: CONFIG.tableName,
+          tile_style: CONFIG.style,
+          opacity:    opacity,
+          query:      query,
+
+          extra_params: {
+            cache_buster: version,
+            cache_policy: 'persist'
+          },
+
+          interactivity: "cartodb_id, status, st_usps",
+
+          featureOver:  onFeatureHover,
+          featureOut:   onFeatureOut,
+          featureClick: onFeatureClick,
+
+          debug: false
+          
+        });
+
+      }
+
+      // Fade in and switch the layers
+      function fadeIn(lyr) {
+
+        var
+        deleted = false,
+        opacity = 0;
+
+        (function animloop(){
+
+          request = requestAnimFrame(animloop);
+
+          lyr.setOpacity(opacity);
+
+          opacity += .05;
+
+          if (!deleted && opacity >= 1 ) {
+
+            opacity = 0;
+            deleted = true;
+
+            resetStopWatch();
+
+            cancelRequestAnimFrame(request);
+
+            // Switch layers
+            map.removeLayer(layer);
+
+            layer = lyr;
+
+            map.invalidateSize(false);
+
+            setTimeout(function() {
+              console.log("There are " + $(".leaflet-layer").length + " layer/s");
+            }, 1000);
+
+          }
+
+        })();
+      }
+
+      // When the new layer is fully loaded, we show it gradually.
+      // Then we remove the old layer.
+      function onLayerLoaded(layerNew) {
+
+        layerNew.off("load", null, layerNew); // unbind the load event
+        showMessage("Map updated", true);
+
+        lock_refresh = false;
+
+        if (oldIE) { // since IE<9 doesn't support opacity, we just remove the layer
+
+          map.removeLayer(layer);
+
+          layer = layerNew; // layer switch
+
+          map.invalidateSize(false);
+
+        } else {
+          fadeIn(layerNew);
+        }
+
+      }
+
+      function refresh(force) {
+
+        if ( autolock || lock_refresh || (stop_refresh && force != true) ) return;
+
+        // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
+        var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
+
+
+        $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
+
+          try {
+
+            if (!data.rows) {
+              data = JSON.parse(data);
+            }
+
+          } catch(e) {
+            console.log("Error", e);
+            return;
+          }
+
+          var epoch = data.rows[0].epoch_updated;
+
+          if (epoch > lastEpoch) { // Update the map
+
+            if (!layer) { // create layer
+
+              layer = createLayer(epoch, 1);
+
+              map.addLayer(layer, false);
+
+              startStopWatch();
+
+            } else { // update layer
+
+              showMessage("New data coming…", false);
+
+              lock_refresh     = true;
+
+              var opacity = (oldIE) ? 1 : 0; // since IE<9 versions don't support opacity we just create a visible layer
+
+              var layerNew = createLayer(epoch, opacity);
+
+              map.addLayer(layerNew, false);
+
+              layerNew.on("load", function() {
+                onLayerLoaded(this);
+              });
+
+            }
+
+            lastEpoch = epoch;
+          }
+
+        }});
+
+        if (!timer) { // creates the timer
+          timer = setInterval(refresh, refresh_interval);
+        }
+      }
+
+      // To maximize the feature hover/out speed we load the geometries of the cty0921md in a hash
+      function getHoverData() {
+
+        var url = "http://com.cartodb.uselections.s3.amazonaws.com/hover_geoms/cty0921md_01.js";
+
+        $.ajax({ url: url, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
+          hoverData = data;
+        }});
+
+      }
+
+      function stateChanged(){  
+
+        console.log(document.webkitVisibilityState);  
+        console.log(document.visibilityState);  
+
+        if (document.hidden || document.webkitHidden || document.msHidden || document.mozHidden){  
+          //new tab or window minimized
+          timer = new Date().getTime();  
+          autolock = true;
+        }  else {  
+          console.log('You were away for ' + (new Date().getTime()-timer)/1000+ ' seconds.')  
+          autolock = false;
+
+        }  
+      }  
+
+      function init() {
+
+        document.addEventListener("mozvisibilitychange",    stateChanged, false);  
+        document.addEventListener("visibilitychange",       stateChanged, false);  
+        document.addEventListener("webkitvisibilitychange", stateChanged, false);  
+        document.addEventListener("msvisibilitychange",     stateChanged, false);  
+
+        $(".toggle_refresh").on("click", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (autolock && stop_refresh == false) return;
+
+          stop_refresh = !stop_refresh;
+
+          if (stop_refresh) {
+            $(this).html("Start autorefresh");
+            $(this).parent().addClass("stopped");
+
+          } else {
+
+            $(this).html("");
+            $(this).html("Stop autorefresh");
+            $(this).parent().removeClass("stopped");
+          }
+
+        });
+
+        $(".refresh").on("click", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          refresh(true);
+          console.log("refreshing");
+
+        });
+
+        setupStopWatch();
+
+        // Initialize the popup
+        popup = new L.CartoDBPopup();
+
+        // Get the counties geometries
+        getHoverData();
+
+        // Set the map options
+        var mapOptions = {
+          center: new L.LatLng(CONFIG.lat, CONFIG.lng),
+          zoom: CONFIG.zoom,
+          maxZoom: CONFIG.maxZoom,
+          minZoom: CONFIG.minZoom,
+          zoomAnimation: true,
+          fadeAnimation: true
+        };
+
+        map = new L.Map('map', mapOptions);
+
+        map.on("popupclose", function() {
+          map.removeLayer(clickLayer);
+        });
+
+        refresh(); // Go!
+      }
+    </script>
+
+    <a href="https://github.com/cartodb/real-time-map"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+  </body>
+</html>
