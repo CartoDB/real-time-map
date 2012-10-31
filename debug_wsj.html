@@ -344,23 +344,12 @@
         if ( autolock || lock_refresh || (stop_refresh && force != true) ) return;
 
         // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
-        var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
-
+        //var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
+        var url = "http://com.cartodb.refreshtokens.s3.amazonaws.com/wsjgraphics/lastupdate.jsonp";
 
         $.ajax({ url: url, cache: true, jsonpCallback: "callback", dataType: "jsonp", success: function(data) {
 
-          try {
-
-            if (!data.rows) {
-              data = JSON.parse(data);
-            }
-
-          } catch(e) {
-            console.log("Error", e);
-            return;
-          }
-
-          var epoch = data.rows[0].epoch_updated;
+          var epoch = data.states_results_version;
 
           if (epoch > lastEpoch) { // Update the map
 
