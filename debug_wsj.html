@@ -351,7 +351,7 @@
 
           var epoch = data.states_results_version;
 
-          if (epoch > lastEpoch) { // Update the map
+          if (epoch != lastEpoch) { // Update the map
 
             if (!layer) { // create layer
 
