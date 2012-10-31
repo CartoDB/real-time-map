@@ -73,8 +73,11 @@
 
       };
 
+
+      autolock                = false;
       stop_refresh            = false;
       lock_refresh            = false;
+
       refresh_interval        = 3000;
 
       window.stop_refresh     = stop_refresh;
@@ -337,7 +340,7 @@
 
       function refresh(force) {
 
-        if ( lock_refresh || (stop_refresh && force != true) ) return;
+        if ( autolock || lock_refresh || (stop_refresh && force != true) ) return;
 
         // We ping this URL every 3000 ms (or the number defined in CONFIG.refreshInterval) and if the table was updated we create a new layer.
         var url = "http://" + CONFIG.watchedUserName + ".cartodb.com/api/v2/sql?q=" + escape("SELECT max(version) as epoch_updated FROM " + CONFIG.watchedTableName);
@@ -415,13 +418,13 @@
         if (document.hidden || document.webkitHidden || document.msHidden || document.mozHidden){  
           //new tab or window minimized
           timer = new Date().getTime();  
-          lock_refresh = true;
+          autolock = true;
         }  else {  
           console.log('You were away for ' + (new Date().getTime()-timer)/1000+ ' seconds.')  
-          lock_refresh = false;
+          autolock = false;
+
         }  
       }  
-
 
       function init() {
 
@@ -434,8 +437,9 @@
           e.preventDefault();
           e.stopPropagation();
 
+          if (autolock && stop_refresh == false) return;
+
           stop_refresh = !stop_refresh;
-          lock_refresh = stop_refresh;
 
           if (stop_refresh) {
             $(this).html("Start autorefresh");
