@@ -415,6 +415,7 @@
 
       function init() {
 
+        document.addEventListener("mozvisibilitychange",    stateChanged, false);  
         document.addEventListener("visibilitychange",       stateChanged, false);  
         document.addEventListener("webkitvisibilitychange", stateChanged, false);  
         document.addEventListener("msvisibilitychange",     stateChanged, false);  
