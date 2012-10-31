@@ -142,15 +142,17 @@
         $(".last-update").stopwatch('reset');
       }
 
-      function showMessage(message) {
+      function showMessage(message, hide) {
 
         $(".message").html(message);
 
         $(".message").animate({ opacity: 1, top: 0 }, { duration: 250, complete: function() {
 
-          setTimeout(function() {
-            $(".message").animate({ opacity: 0, top: "-40px" }, 250);
-          }, 3000);
+          if (hide) {
+            setTimeout(function() {
+              $(".message").animate({ opacity: 0, top: "-40px" }, 250);
+            }, 3000);
+          }
 
         }});
       }
@@ -315,7 +317,7 @@
       function onLayerLoaded(layerNew) {
 
         layerNew.off("load", null, layerNew); // unbind the load event
-        showMessage("Map updated");
+        showMessage("Map updated", true);
 
         lock_refresh = false;
 
@@ -368,7 +370,7 @@
 
             } else { // update layer
 
-              showMessage("New data coming…");
+              showMessage("New data coming…", false);
 
               lock_refresh     = true;
 
