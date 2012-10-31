@@ -396,7 +396,28 @@
 
       }
 
+      function stateChanged(){  
+
+        console.log(document.webkitVisibilityState);  
+        console.log(document.visibilityState);  
+
+        if (document.hidden || document.webkitHidden || document.msHidden || document.mozHidden){  
+          //new tab or window minimized
+          timer = new Date().getTime();  
+          window.stop_refresh = true;
+        }  
+        else {  
+          console.log('You were away for ' + (new Date().getTime()-timer)/1000+ ' seconds.')  
+          window.stop_refresh = false;
+        }  
+      }  
+
+
       function init() {
+
+        document.addEventListener("visibilitychange",       stateChanged, false);  
+        document.addEventListener("webkitvisibilitychange", stateChanged, false);  
+        document.addEventListener("msvisibilitychange",     stateChanged, false);  
 
         $(".toggle_refresh").on("click", function(e) {
           e.preventDefault();
